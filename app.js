@@ -75,7 +75,7 @@ app.get('/test', async (req, res) => {
     }
     
     // Pick a random tech entry from the CSV data
-    const randomTech = techRadarData[Math.floor(Math.random() * techRadarData.length)];
+    //const randomTech = techRadarData[Math.floor(Math.random() * techRadarData.length)];
 
     const userPrompt = req.query.prompt || "Provide an amusing description.";
 
@@ -83,11 +83,11 @@ app.get('/test', async (req, res) => {
     const prompt = `
       Provide a description for the following technology:
       
-      Name: ${randomTech.Name}
-      Status: ${randomTech.Status}
-      Category: ${randomTech.Category}
-      Dependency: ${randomTech.Dependency}
-      Mentor: ${randomTech.Mentor}
+      Name: ${Name}
+      Status: ${Status}
+      Category: ${Category}
+      Dependency: ${Dependency}
+      Mentor: ${Mentor}
       
       ${userPrompt}
     `;
