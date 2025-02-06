@@ -33,14 +33,13 @@ function readTechRadarCSV(filePath) {
   });
 }
 
-// Endpoint to process tech radar data from the CSV
+// Endpoint to process tech radar data from the CSV (lists all techs).
 app.get('/tech-radar', async (req, res) => {
   try {
-    // Read and parse the CSV file (ensure the file is in your project root or update the path)
+    // Read and parse the CSV file (ensure the file path is correct)
     const techRadarData = await readTechRadarCSV('./tech-radar/tech-radar.csv');
 
     // Build a prompt that includes the CSV data.
-    // Here we format the data nicely using JSON.stringify.
     const prompt = `
       Here is our tech radar data:
       ${JSON.stringify(techRadarData, null, 2)}
@@ -59,37 +58,42 @@ app.get('/tech-radar', async (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
-// Ensure this is placed after (or with) your other endpoints in server.js
-app.get('/test', async (req, res) => {
+// Updated /test endpoint that uses a dynamic route parameter for the selected tech.
+app.get('/test/:selected', async (req, res) => {
   try {
     // Read and parse the CSV file (ensure the file path is correct)
     const techRadarData = await readTechRadarCSV('./tech-radar/tech-radar.csv');
-    
+
     if (techRadarData.length === 0) {
       return res.status(404).send("No tech data available.");
     }
-    
-    // Pick a random tech entry from the CSV data
-    //const randomTech = techRadarData[Math.floor(Math.random() * techRadarData.length)];
 
+    // Get the selected tech from the route parameter.
+    const selectedTech = req.params.selected;
+
+    // Find the matching tech entry (using case-insensitive comparison).
+    const techEntry = techRadarData.find(
+      tech => tech.Name.trim().toLowerCase() === selectedTech.trim().toLowerCase()
+    );
+
+    if (!techEntry) {
+      return res.status(404).send("Tech not found.");
+    }
+
+    // Use an optional prompt query parameter or a default.
     const userPrompt = req.query.prompt || "Provide an amusing description.";
 
     // Build a composite prompt that includes the tech details and the user prompt.
     const prompt = `
-      Provide a description for the following technology:
-      
-      Name: ${Name}
-      Status: ${Status}
-      Category: ${Category}
-      Dependency: ${Dependency}
-      Mentor: ${Mentor}
-      
-      ${userPrompt}
+Provide a description for the following technology:
+
+Name: ${techEntry.Name}
+Status: ${techEntry.Status}
+Category: ${techEntry.Category}
+Dependency: ${techEntry.Dependency}
+Mentor: ${techEntry.Mentor}
+
+${userPrompt}
     `;
 
     // Call the chatCompletion function to get the AI's response.
@@ -101,3 +105,7 @@ app.get('/test', async (req, res) => {
   }
 });
 
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
