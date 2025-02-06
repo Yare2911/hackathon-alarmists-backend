@@ -2,9 +2,10 @@ import express from 'express';
 import fs from 'fs';
 import csv from 'csv-parser';
 import chatCompletion from './service/openai.js';
+import cors from 'cors';
 
 const app = express();
-
+app.use(cors());
 
 function readTechRadarCSV(filePath) {
   return new Promise((resolve, reject) => {
